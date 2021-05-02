@@ -1,55 +1,55 @@
 // import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Button, ScrollView } from 'react-native';
+import { StyleSheet, View, Button, FlatList } from 'react-native';
+
+import GoalItem from './components/GoalItem';
+import GoalInput from './components/GoalInput';
 
 export default function App() {
-  const [enteredGoal, setEnteredGoal] = useState('');
+
   const [courseGoals, setCourseGoals] = useState([]);
+  const [isAddMode, setIsAddMode] = useState(false);
 
-  const goalInputHandler = enteredText => setEnteredGoal(enteredText);
 
-  const addGoalHandler = () => setCourseGoals(currentGoals => [...currentGoals, enteredGoal]);
+  const addGoalHandler = goalTitle => {
+    setCourseGoals(currentGoals => [...currentGoals,
+    { key: Math.random().toString(), value: goalTitle }
+    ]);
+    setIsAddMode(false);
+  };
+
+  const removeGoalHandler = goalId => {
+    setCourseGoals(currentGoals => {
+      return currentGoals.filter(goal => goal.key !== goalId);
+    })
+  }
+
+  const cancelGoalAdditionHandler = () => {
+    setIsAddMode(false);
+  }
 
   return (
     <View style={styles.screen} >
-      <View style={styles.inputConteiner}>
-        <TextInput value={enteredGoal} placeholder="Course Goal" style={styles.input} onChangeText={goalInputHandler} />
-        <Button title="ADD" onPress={addGoalHandler} />
-      </View>
+      <Button title="Add New Goal" onPress={setIsAddMode.bind(this, true)} />
+      <GoalInput
+        visible={isAddMode}
+        addData={addGoalHandler} 
+        onCancel={cancelGoalAdditionHandler} />
       <View>
-        <ScrollView>
-          {courseGoals.map((goal, index) => (
-            <View style={styles.listItem} key={index}>
-              <Text >{goal}</Text>
-            </View>
-          ))}
-        </ScrollView>
+        <FlatList
+          data={courseGoals}
+          renderItem={itemData => <GoalItem id={itemData.item.key} onDelete={removeGoalHandler} title={itemData.item.value} />}
+        />
       </View>
       {/* <StatusBar style="auto" /> */}
-    </View>
+    </View >
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
     padding: 50
-  },
-  inputConteiner: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center"
-  },
-  input: {
-    width: "80%",
-    borderBottomColor: "black",
-    borderWidth: 1,
-    padding: 10
-  },
-  listItem: {
-    padding: 10,
-    marginVertical: 10,
-    backgroundColor: "#ccc",
-    borderColor: "black",
-    borderWidth: 1
   }
+
+
 });
